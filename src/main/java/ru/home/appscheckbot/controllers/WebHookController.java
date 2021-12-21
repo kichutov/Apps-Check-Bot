@@ -70,6 +70,7 @@ public class WebHookController {
             log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
 
             // Если пользователя нет в базе данных, то заносим его в базу
+            log.info(String.valueOf(botUserService.existsUserByUserId(user.getId())));
             if (!botUserService.existsUserByUserId(user.getId())) {
                 botUserService.saveUser(new BotUser(user));
             }
@@ -122,15 +123,15 @@ public class WebHookController {
             return telegramBot.myApps(update);
         }
 
-        // Если статус MY_APPS и в update текст "Назад", то
+        // Если статус MY_APPS
         if (usersBotStatesCache.getUsersCurrentBotState(user.getId()) == BotState.MY_APPS) {
-
+            // в update текст "Назад"
             if (messageText.equals(localeMessageService.getMessage("fromUser.goBack"))) {
                 usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.MAIN_MENU);
                 log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
                 return telegramBot.mainMenu(update); // переходим в главное меню
             }
-
+            // в update текст "Добавить приложение"
             if (messageText.equals(localeMessageService.getMessage("fromUser.addApp"))) {
                 usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.ADD_NEW_APP);
                 log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
@@ -140,19 +141,30 @@ public class WebHookController {
             // РЕАЛИЗОВАТЬ КЛИК ПО КНОПКЕ С НАЗВАНИЕМ ПРИЛОЖЕНИЯ
         }
 
-        // Если статус MY_APPS и в update текст "Назад", то
+
+
+        // Если статус ADD_NEW_APP
         if (usersBotStatesCache.getUsersCurrentBotState(user.getId()) == BotState.ADD_NEW_APP) {
 
+            // в update текст "Назад"
             if (messageText.equals(localeMessageService.getMessage("fromUser.goBack"))) {
                 usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.MY_APPS);
                 log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
                 return telegramBot.myApps(update);
+
             } else if (messageText.startsWith("https://play.google.com/store/apps/details?id=")) {
+
+                usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.NOTIFICATION);
+                log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
+
                 // Создаём объект с информацией о приложении
                 App app = new App();
                 app.setUrl(messageText); // Заносим ссылку в Google Play
                 // Проверяем, есть ли приложение в базе
-                if (!(appService.existsAppByUrl(messageText, user.getId()))) {
+                log.info(messageText);
+                log.info(user.getId().toString());
+                log.info(String.valueOf(appService.existsAppByUrlAndUserId(messageText, user.getId())));
+                if (!(appService.existsAppByUrlAndUserId(messageText, user.getId()))) {
                     // Создаём переменную для страницу Google Play
                     Document document;
                     // Пробуем спарсить страницу в Google Play
@@ -174,7 +186,7 @@ public class WebHookController {
 
                     // Устанавливаем рейтинг
                     Elements rating = document.select("div[aria-label*=Rated]");
-                    app.setRating(Float.parseFloat(rating.text()));
+                    app.setRating(rating.text());
 
                     // Устанавливаем количество установок
                     Elements installsCount = document.select("div.hAyfc:nth-child(3) > span");

@@ -89,7 +89,13 @@ public class KeyboardService {
         // Вставляем кнопки для каждого приложения из списка
         for (int i = 0; i < appsList.size(); i++) {
             KeyboardRow keyboardRowForAppsList = new KeyboardRow();
-            keyboardRowForAppsList.add(new KeyboardButton(appsList.get(i).getTitle()));
+            // Формируем надпись на кнопках
+            String title = String.format("%s (%s) %s",
+                    appsList.get(i).getTitle(),
+                    appsList.get(i).getBundle(),
+                    appsList.get(i).getInstallsCount());
+            keyboardRowForAppsList.add(new KeyboardButton(title));
+            keyboard.add(keyboardRowForAppsList);
         }
 
         // Устанавливаем разметку в финальную клавиатуру

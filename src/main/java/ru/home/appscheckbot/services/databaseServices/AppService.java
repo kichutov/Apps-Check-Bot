@@ -25,20 +25,26 @@ public class AppService {
         return appRepository.save(app);
     }
 
-    public boolean existsAppByUrl(String url, int userId) {
+    public boolean existsAppByUrlAndUserId(String url, Integer userId) {
         App app = new App();
         app.setUrl(url);
         app.setUserId(userId);
+        app.setStatus(null);
+        app.setDateOfCreation(null);
         ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("url", exact()).withMatcher("userId", exact());
         Example example = Example.of(app, matcher);
         return appRepository.exists(example);
     }
 
-    public List<App> findAllAppsByUserId(int userId) {
+    public List<App> findAllAppsByUserId(Integer userId) {
         App app = new App();
         app.setUserId(userId);
+        app.setStatus(null);
+        app.setDateOfCreation(null);
         ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("userId", exact());
         Example example = Example.of(app, matcher);
         return appRepository.findAll(example);
     }
+
+
 }
