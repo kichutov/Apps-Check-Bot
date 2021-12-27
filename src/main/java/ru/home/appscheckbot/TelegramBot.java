@@ -8,6 +8,7 @@ import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -109,12 +110,53 @@ public class TelegramBot extends TelegramWebhookBot {
         return message;
     }
 
-    public BotApiMethod<?> appMenu(Update update, App app) {
+    public BotApiMethod<?> appMainMenu(Update update, App app) {
         message.setChatId(update.getMessage().getChatId().toString()); // устанавливаем chatId
-        message.setText(localeMessageService.getMessage("fromBot.appMenu") + " " + app.getBundle() );
-        message.setReplyMarkup(keyboardService.makeKeyboardAppMenu(app.getBundle()));
-        log.info("Write to developer");
+        message.setText(localeMessageService.getMessage("fromBot.appMainMenu") + " " + app.getBundle() );
+        message.setReplyMarkup(keyboardService.makeKeyboardAppMainMenu(app));
         return message;
+    }
+
+    public BotApiMethod<?> appNotificationsMenu(Update update, App app) {
+
+        String callbackData = update.getCallbackQuery().getData();
+        int messageId = update.getCallbackQuery().getMessage().getMessageId();
+        long chatId = update.getCallbackQuery().getMessage().getChatId();
+
+        EditMessageText newMessage = new EditMessageText()
+                .setChatId(chatId)
+                .setMessageId(messageId)
+                .setReplyMarkup(keyboardService.makeKeyboardAppNotificationsMenu(app))
+                .setText(localeMessageService.getMessage("fromBot.appNotificationsMenu") + " " + app.getBundle());
+
+        try {
+            execute(newMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public BotApiMethod<?> goAppMainMenu(Update update, App app) {
+
+        String callbackData = update.getCallbackQuery().getData();
+        int messageId = update.getCallbackQuery().getMessage().getMessageId();
+        long chatId = update.getCallbackQuery().getMessage().getChatId();
+
+        EditMessageText newMessage = new EditMessageText()
+                .setChatId(chatId)
+                .setMessageId(messageId)
+                .setReplyMarkup(keyboardService.makeKeyboardAppMainMenu(app))
+                .setText(localeMessageService.getMessage("fromBot.appMainMenu") + " " + app.getBundle());
+
+        try {
+            execute(newMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 

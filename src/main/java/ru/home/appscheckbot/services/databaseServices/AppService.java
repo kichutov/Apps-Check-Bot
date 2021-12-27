@@ -31,6 +31,8 @@ public class AppService {
         app.setUserId(userId);
         app.setStatus(null);
         app.setDateOfCreation(null);
+        app.setNotifyInstallsCount(null);
+        app.setNotifyRating(null);
         ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("url", exact()).withMatcher("userId", exact());
         Example example = Example.of(app, matcher);
         return appRepository.exists(example);
@@ -41,6 +43,8 @@ public class AppService {
         app.setUserId(userId);
         app.setStatus(null);
         app.setDateOfCreation(null);
+        app.setNotifyInstallsCount(null);
+        app.setNotifyRating(null);
         ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("userId", exact());
         Example example = Example.of(app, matcher);
         return appRepository.findAll(example);
@@ -52,6 +56,8 @@ public class AppService {
         app.setBundle(bundle);
         app.setStatus(null);
         app.setDateOfCreation(null);
+        app.setNotifyInstallsCount(null);
+        app.setNotifyRating(null);
         ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("bundle", exact()).withMatcher("userId", exact());
         Example example = Example.of(app, matcher);
         return (App) appRepository.findOne(example).orElse(null);
@@ -65,6 +71,32 @@ public class AppService {
             appRepository.delete(app);
             return true;
         }
+    }
+
+    public boolean existsAppByUserIdAndBundle(Integer userId, String bundle) {
+        App app = new App();
+        app.setBundle(bundle);
+        app.setUserId(userId);
+        app.setStatus(null);
+        app.setDateOfCreation(null);
+        app.setNotifyInstallsCount(null);
+        app.setNotifyRating(null);
+        ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("bundle", exact()).withMatcher("userId", exact());
+        Example example = Example.of(app, matcher);
+        return appRepository.exists(example);
+    }
+
+
+    public void changeNotifyInstallsCountByUserIdAndBundle(Integer userId, String bundle) {
+        App app = findAppByUserIdAndBundle(userId, bundle);
+        app.setNotifyInstallsCount(!app.getNotifyInstallsCount());
+        appRepository.save(app);
+    }
+
+    public void changeNotifyRatingByUserIdAndBundle(Integer userId, String bundle) {
+        App app = findAppByUserIdAndBundle(userId, bundle);
+        app.setNotifyRating(!app.getNotifyRating());
+        appRepository.save(app);
     }
 
 

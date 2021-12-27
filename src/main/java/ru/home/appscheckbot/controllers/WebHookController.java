@@ -56,19 +56,37 @@ public class WebHookController {
         log.info("{}", update);
 
         if (update.hasCallbackQuery()) {
+
             User user = update.getCallbackQuery().getFrom();
             String callbackData = update.getCallbackQuery().getData();
             log.info("Has callbackQuery");
-            if (callbackData.contains("delete")) {
-                String bundle = callbackData.substring(7);
-                usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.MY_APPS);
-                log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
-                if (appService.deleteAppByUserIdAndBundle(user.getId(), bundle)) {
+
+            String bundle = callbackData.substring(callbackData.indexOf(':') + 1);
+
+            if (!appService.existsAppByUserIdAndBundle(user.getId(), bundle)) {
+                telegramBot.popup(update, "Приложение " + bundle + " было удалено ранее!");
+            } else {
+                if (callbackData.contains("delete")) {
+                    appService.deleteAppByUserIdAndBundle(user.getId(), bundle);
                     telegramBot.popup(update, "Приложение " + bundle + " было удалено");
-                } else {
-                    telegramBot.popup(update, "Приложение " + bundle + " было удалено ранее!");
+                } else if (callbackData.contains("notifications")) {
+                    App app = appService.findAppByUserIdAndBundle(user.getId(), bundle);
+                    return telegramBot.appNotificationsMenu(update, app);
+                } else if (callbackData.contains("goAppMainMenu")) {
+                    App app = appService.findAppByUserIdAndBundle(user.getId(), bundle);
+                    return telegramBot.goAppMainMenu(update, app);
+                } else if (callbackData.contains("notifyInstallsCount")) {
+                    appService.changeNotifyInstallsCountByUserIdAndBundle(user.getId(), bundle);
+                    App app = appService.findAppByUserIdAndBundle(user.getId(), bundle);
+                    return telegramBot.appNotificationsMenu(update, app);
+                } else if (callbackData.contains("notifyRating")) {
+                    appService.changeNotifyRatingByUserIdAndBundle(user.getId(), bundle);
+                    App app = appService.findAppByUserIdAndBundle(user.getId(), bundle);
+                    return telegramBot.appNotificationsMenu(update, app);
                 }
             }
+
+
         }
 
 
@@ -166,7 +184,7 @@ public class WebHookController {
             List<App> appList = appService.findAllAppsByUserId(user.getId());
             for (App app : appList) {
                 if (messageText.contains("(" + app.getBundle() + ")")) {
-                    return telegramBot.appMenu(update, app);
+                    return telegramBot.appMainMenu(update, app);
                 }
             }
 

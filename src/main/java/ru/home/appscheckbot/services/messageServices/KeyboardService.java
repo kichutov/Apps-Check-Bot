@@ -151,10 +151,10 @@ public class KeyboardService {
     }
 
     // Создание клавиатуры для AppMenu
-    public InlineKeyboardMarkup makeKeyboardAppMenu(String bundle) {
+    public InlineKeyboardMarkup makeKeyboardAppMainMenu(App app) {
 
         // Создаём финальную клавиатуру для сообщения
-        InlineKeyboardMarkup inlineKeyboardMarkup =new InlineKeyboardMarkup();
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
         // Создаём список строк
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -163,8 +163,8 @@ public class KeyboardService {
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
         List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
         // В каждую строку добавляем 1 кнопку
-        keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Уведомления").setCallbackData("notifications:" + bundle));
-        keyboardButtonsRow2.add(new InlineKeyboardButton().setText("Удалить").setCallbackData("delete:" + bundle));
+        keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Уведомления").setCallbackData("notifications:" + app.getBundle()));
+        keyboardButtonsRow2.add(new InlineKeyboardButton().setText("Удалить").setCallbackData("delete:" + app.getBundle()));
         // Добавляем строки в список строк
         keyboard.add(keyboardButtonsRow1);
         keyboard.add(keyboardButtonsRow2);
@@ -175,33 +175,39 @@ public class KeyboardService {
         return inlineKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup makeKeyboardAppNotificationsMenu(App app) {
+
+        // Создаём финальную клавиатуру для сообщения
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+        // Создаём список строк
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        // Создаём строки
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+        List<InlineKeyboardButton> keyboardButtonsRow3 = new ArrayList<>();
+
+        // Получаем данные из Базы об уже установленных состояниях Notification
+        Boolean notifyInstallsCount = app.getNotifyInstallsCount();
+        Boolean notifyRating = app.getNotifyRating();
+
+        // В каждую строку добавляем 1 кнопку
+        keyboardButtonsRow1.add(new InlineKeyboardButton().setText(notifyInstallsCount + " - Кол-во установок").setCallbackData("notifyInstallsCount:" + app.getBundle()));
+        keyboardButtonsRow2.add(new InlineKeyboardButton().setText(notifyRating + " - Изменение рейтинга").setCallbackData("notifyRating:" + app.getBundle()));
+        keyboardButtonsRow3.add(new InlineKeyboardButton().setText("Назад").setCallbackData("goAppMainMenu:" + app.getBundle()));
+        // Добавляем строки в список строк
+        keyboard.add(keyboardButtonsRow1);
+        keyboard.add(keyboardButtonsRow2);
+        keyboard.add(keyboardButtonsRow3);
+
+        // Устанавливаем разметку в финальную клавиатуру
+        inlineKeyboardMarkup.setKeyboard(keyboard);
+
+        return inlineKeyboardMarkup;
+    }
+
+
 
 
 }
-
-//    // Создаём строку кнопок 1
-//    List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-//            keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Кнопка 1-1")
-//                    .setCallbackData("CallFi4a")); // Добавляем кнопку 1
-//            keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Кнопка 1-2")
-//                    .setCallbackData("CallFi4a")); // Добавляем кнопку 2
-//
-//    // Создаём строку кнопок 2
-//    List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
-//            keyboardButtonsRow2.add(new InlineKeyboardButton().setText("Кнопка 2-1")
-//                    .setCallbackData("CallFi4a")); // Добавляем кнопку 3
-//            keyboardButtonsRow2.add(new InlineKeyboardButton().setText("Кнопка 2-2")
-//                    .setCallbackData("CallFi4a")); // Добавляем кнопку 4
-//
-//
-//    // Добавляем строки в массив строк
-//    List<List<InlineKeyboardButton>> rowList= new ArrayList<>();
-//            rowList.add(keyboardButtonsRow1);
-//            rowList.add(keyboardButtonsRow2);
-//
-//    // Создаём клавиатуру
-//    InlineKeyboardMarkup inlineKeyboardMarkup =new InlineKeyboardMarkup();
-//
-//    // Собираем финальную клавиатуру
-//            inlineKeyboardMarkup.setKeyboard(rowList);
-

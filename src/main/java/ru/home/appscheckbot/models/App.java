@@ -29,6 +29,10 @@ public class App {
     private String title;
     @Column(name = "dateofcreation")
     private Date dateOfCreation;
+    @Column(name = "notify_installs_count")
+    private Boolean notifyInstallsCount;
+    @Column(name = "notify_rating")
+    private Boolean notifyRating;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userid")
@@ -37,6 +41,8 @@ public class App {
     public App() {
         this.status = "created";
         this.dateOfCreation = new Date();
+        this.notifyInstallsCount = true;
+        this.notifyRating = true;
     }
 
 }
