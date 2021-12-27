@@ -1,7 +1,9 @@
 package ru.home.appscheckbot.services.messageServices;
 
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.home.appscheckbot.models.App;
@@ -146,6 +148,31 @@ public class KeyboardService {
         replyKeyboardMarkup.setKeyboard(keyboard);
 
         return replyKeyboardMarkup;
+    }
+
+    // Создание клавиатуры для AppMenu
+    public InlineKeyboardMarkup makeKeyboardAppMenu(String bundle) {
+
+        // Создаём финальную клавиатуру для сообщения
+        InlineKeyboardMarkup inlineKeyboardMarkup =new InlineKeyboardMarkup();
+
+        // Создаём список строк
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        // Создаём строки
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+        // В каждую строку добавляем 1 кнопку
+        keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Уведомления").setCallbackData("notifications:" + bundle));
+        keyboardButtonsRow2.add(new InlineKeyboardButton().setText("Удалить").setCallbackData("delete:" + bundle));
+        // Добавляем строки в список строк
+        keyboard.add(keyboardButtonsRow1);
+        keyboard.add(keyboardButtonsRow2);
+
+        // Устанавливаем разметку в финальную клавиатуру
+        inlineKeyboardMarkup.setKeyboard(keyboard);
+
+        return inlineKeyboardMarkup;
     }
 
 

@@ -23,6 +23,7 @@ import ru.home.appscheckbot.services.databaseServices.MessageForDeveloperService
 import ru.home.appscheckbot.services.messageServices.LocaleMessageService;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -52,14 +53,36 @@ public class WebHookController {
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public BotApiMethod<?> onUpdateRecived(@RequestBody Update update) {
 
+        log.info("{}", update);
+
+        if (update.hasCallbackQuery()) {
+            User user = update.getCallbackQuery().getFrom();
+            String callbackData = update.getCallbackQuery().getData();
+            log.info("Has callbackQuery");
+            if (callbackData.contains("delete")) {
+                String bundle = callbackData.substring(7);
+                usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.MY_APPS);
+                log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
+                if (appService.deleteAppByUserIdAndBundle(user.getId(), bundle)) {
+                    telegramBot.popup(update, "Приложение " + bundle + " было удалено");
+                } else {
+                    telegramBot.popup(update, "Приложение " + bundle + " было удалено ранее!");
+                }
+            }
+        }
+
+
         // Если в update нет message и text, то ничего не делаем
         if (!(update.getMessage() != null && update.getMessage().hasText())) {
+            log.info("New update: {}", update);
+            log.info("CallbackQuery: {}", update.getCallbackQuery());
+
             return telegramBot.doNothing(); // Ничего не меняем на frontend
         }
 
-        // Создаём объекты из update для работы
-        User user = update.getMessage().getFrom();
+        // Создаём объекты из update
         String messageText = update.getMessage().getText();
+        User user = update.getMessage().getFrom();
 
         log.info("New update from {}, Text: {}", user, messageText);
 
@@ -131,6 +154,7 @@ public class WebHookController {
                 log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
                 return telegramBot.mainMenu(update); // переходим в главное меню
             }
+
             // в update текст "Добавить приложение"
             if (messageText.equals(localeMessageService.getMessage("fromUser.addApp"))) {
                 usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.ADD_NEW_APP);
@@ -138,7 +162,14 @@ public class WebHookController {
                 return telegramBot.addNewApp(update, "fromBot.addApp");
             }
 
-            // РЕАЛИЗОВАТЬ КЛИК ПО КНОПКЕ С НАЗВАНИЕМ ПРИЛОЖЕНИЯ
+            // клик по кнопке с названием приложения (ищем по bundle)
+            List<App> appList = appService.findAllAppsByUserId(user.getId());
+            for (App app : appList) {
+                if (messageText.contains("(" + app.getBundle() + ")")) {
+                    return telegramBot.appMenu(update, app);
+                }
+            }
+
         }
 
 
@@ -192,15 +223,9 @@ public class WebHookController {
                     Elements installsCount = document.select("div.hAyfc:nth-child(3) > span");
                     app.setInstallsCount(installsCount.text());
 
-                    log.info("Перед добавлением приложения");
                     BotUser botUser = botUserService.getUserByUserId(user.getId());
-                    log.info("Нашёл ботюзера при добавлении приложения {}", botUser.toString());
                     app.setBotUser(botUser);
-                    log.info("Внедрил ботЮзера в app");
-
                     app.setUserId(botUser.getUserId());
-                    log.info("{}", app.toString());
-
                     appService.saveApp(app);
                     // уведомление о том, что приложение добавлено
                     return telegramBot.notifyUser(update, "Приложение было добавлено");
@@ -208,36 +233,11 @@ public class WebHookController {
                     // уведомление о том, что приложение уже есть в базе
                     return telegramBot.notifyUser(update, "Приложение уже отслеживается");
                 }
-
+                // просим ввести корректную ссылку на приложение в Google Play
             } else {
                 return telegramBot.addNewApp(update, "fromBot.enterCorrectLink");
             }
-
         }
-
-
-
-
-
-
-
-        // Если статус MY_APPS, то...
-        if (usersBotStatesCache.getUsersCurrentBotState(user.getId()) == BotState.MY_APPS) {
-            if (messageText.equals(localeMessageService.getMessage("fromUser.goBack"))) { // Если "Назад", то...
-                usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.MAIN_MENU); // Просто возвращаемся в главное меню
-            } else if (messageText.equals(localeMessageService.getMessage("fromUser.addApp"))) { // Если "Добавить приложение", то...
-                usersBotStatesCache.setUsersCurrentBotState(user.getId(), BotState.ADD_NEW_APP); // Устанавливаем статус ADD_NEW_APP
-            }
-
-            // ТУТ НУЖНО ДОПИСАТЬ ЛОГИКУ ДЛЯ ОБРАБОТКИ КЛИКА ПО КНОПКАМ С НАЗВАНИЯМИ ПРИЛОЖЕНИЙ
-
-            log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
-            return telegramBot.onWebhookUpdateReceived(update);
-        }
-
-
-
-
 
 
 

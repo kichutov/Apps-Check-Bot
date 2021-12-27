@@ -46,5 +46,26 @@ public class AppService {
         return appRepository.findAll(example);
     }
 
+    public App findAppByUserIdAndBundle(Integer userId, String bundle) {
+        App app = new App();
+        app.setUserId(userId);
+        app.setBundle(bundle);
+        app.setStatus(null);
+        app.setDateOfCreation(null);
+        ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("bundle", exact()).withMatcher("userId", exact());
+        Example example = Example.of(app, matcher);
+        return (App) appRepository.findOne(example).orElse(null);
+    }
+
+    public boolean deleteAppByUserIdAndBundle(Integer userId, String bundle) {
+        App app = findAppByUserIdAndBundle(userId, bundle);
+        if (app == null) {
+            return false;
+        } else {
+            appRepository.delete(app);
+            return true;
+        }
+    }
+
 
 }

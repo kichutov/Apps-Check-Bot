@@ -5,12 +5,15 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.home.appscheckbot.botApi.BotState;
 import ru.home.appscheckbot.cache.UsersBotStatesCache;
+import ru.home.appscheckbot.models.App;
 import ru.home.appscheckbot.services.messageServices.KeyboardService;
 import ru.home.appscheckbot.services.messageServices.LocaleMessageService;
 import ru.home.appscheckbot.services.messageServices.ReplyMessagesService;
@@ -58,10 +61,26 @@ public class TelegramBot extends TelegramWebhookBot {
     }
 
     public BotApiMethod<?> notifyUser(Update update, String notification) {
-        message.setChatId(update.getMessage().getChatId().toString()); // устанавливаем chatId
-        message.setText(notification);
-        message.setReplyMarkup(keyboardService.makeKeyboardNotifyUser());
-        return message;
+            message.setChatId(update.getMessage().getChatId().toString());// устанавливаем chatId
+            message.setText(notification);
+            message.setReplyMarkup(keyboardService.makeKeyboardNotifyUser());
+        log.info("Notify User");
+            return message;
+    }
+
+    public BotApiMethod<?> popup(Update update, String notification) {
+        AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
+        answerCallbackQuery.setCallbackQueryId(update.getCallbackQuery().getId());
+        answerCallbackQuery.setShowAlert(true);
+        answerCallbackQuery.setText(notification);
+        log.info("Popup");
+        try {
+            // Показываем всплывающее сообщение
+            execute(answerCallbackQuery);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+        return answerCallbackQuery;
     }
 
     // Отображаем страницу контакта с разработчиком
@@ -90,9 +109,23 @@ public class TelegramBot extends TelegramWebhookBot {
         return message;
     }
 
+    public BotApiMethod<?> appMenu(Update update, App app) {
+        message.setChatId(update.getMessage().getChatId().toString()); // устанавливаем chatId
+        message.setText(localeMessageService.getMessage("fromBot.appMenu") + " " + app.getBundle() );
+        message.setReplyMarkup(keyboardService.makeKeyboardAppMenu(app.getBundle()));
+        log.info("Write to developer");
+        return message;
+    }
+
+
+
+
+
+
     @SneakyThrows
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
+
 
 
         // Создаём объекты из update для работы
@@ -112,10 +145,6 @@ public class TelegramBot extends TelegramWebhookBot {
             log.info("BotState: {}", usersBotStatesCache.getUsersCurrentBotState(user.getId()));
             return message;
         }
-
-
-
-
 
 
 
