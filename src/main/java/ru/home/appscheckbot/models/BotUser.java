@@ -53,17 +53,4 @@ public class BotUser {
         this.dateOfCreation = new Date();
     }
 
-    public String toString() {
-        return
-//                "BotUser(id=" + this.getId()
-//                +
-                        ", userId=" + this.getUserId()
-                + ", userName=" + this.getUserName()
-                + ", firstName=" + this.getFirstName()
-                + ", lastName=" + this.getLastName()
-                + ", isBot=" + this.getIsBot()
-                + ", languageCode=" + this.getLanguageCode()
-                + ", dateOfCreation=" + this.getDateOfCreation()
-                + ")";
-    }
 }

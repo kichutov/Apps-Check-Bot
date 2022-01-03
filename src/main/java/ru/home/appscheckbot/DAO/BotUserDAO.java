@@ -1,4 +1,4 @@
-package ru.home.appscheckbot.services.databaseServices;
+package ru.home.appscheckbot.DAO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -12,12 +12,12 @@ import java.util.List;
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
 
 @Service
-public class BotUserService {
+public class BotUserDAO {
 
     private final BotUserRepository botUserRepository;
 
     @Autowired
-    public BotUserService(BotUserRepository botUserRepository) {
+    public BotUserDAO(BotUserRepository botUserRepository) {
         this.botUserRepository = botUserRepository;
     }
 
@@ -45,7 +45,7 @@ public class BotUserService {
         return botUserRepository.findAll();
     }
 
-    public BotUser saveUser(BotUser botUser) {
+    public BotUser saveBotUser(BotUser botUser) {
         return botUserRepository.save(botUser);
     }
 

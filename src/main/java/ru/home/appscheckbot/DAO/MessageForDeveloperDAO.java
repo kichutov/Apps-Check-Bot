@@ -1,4 +1,4 @@
-package ru.home.appscheckbot.services.databaseServices;
+package ru.home.appscheckbot.DAO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -12,12 +12,12 @@ import java.util.List;
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
 
 @Service
-public class MessageForDeveloperService {
+public class MessageForDeveloperDAO {
 
     private final MessageForDeveloperRepository messageForDeveloperRepository;
 
     @Autowired
-    public MessageForDeveloperService(MessageForDeveloperRepository messageForDeveloperRepository) {
+    public MessageForDeveloperDAO(MessageForDeveloperRepository messageForDeveloperRepository) {
         this.messageForDeveloperRepository = messageForDeveloperRepository;
     }
 

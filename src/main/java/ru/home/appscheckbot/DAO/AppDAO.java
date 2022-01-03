@@ -1,4 +1,4 @@
-package ru.home.appscheckbot.services.databaseServices;
+package ru.home.appscheckbot.DAO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -12,17 +12,22 @@ import java.util.List;
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
 
 @Service
-public class AppService {
+public class AppDAO {
 
     private final AppRepository appRepository;
 
     @Autowired
-    public AppService(AppRepository appRepository) {
+    public AppDAO(AppRepository appRepository) {
         this.appRepository = appRepository;
     }
 
     public App saveApp(App app) {
         return appRepository.save(app);
+    }
+
+    public List<App> getAllApps() {
+        List<App> appsList = appRepository.findAll();
+        return appsList;
     }
 
     public boolean existsAppByUrlAndUserId(String url, Integer userId) {

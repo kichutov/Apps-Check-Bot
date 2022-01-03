@@ -1,4 +1,4 @@
-package ru.home.appscheckbot.services.messageServices;
+package ru.home.appscheckbot.services;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;

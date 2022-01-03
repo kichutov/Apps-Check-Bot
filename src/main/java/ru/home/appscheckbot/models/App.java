@@ -2,14 +2,12 @@ package ru.home.appscheckbot.models;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "apps")
 public class App {
@@ -39,10 +37,23 @@ public class App {
     private BotUser botUser;
 
     public App() {
-        this.status = "created";
+        this.status = "moderated";
         this.dateOfCreation = new Date();
         this.notifyInstallsCount = true;
         this.notifyRating = true;
     }
 
+    public String toString() {
+        return "App(id=" + this.getId() +
+                ", userId=" + this.getUserId() +
+                ", url=" + this.getUrl() +
+                ", bundle=" + this.getBundle() +
+                ", installsCount=" + this.getInstallsCount() +
+                ", rating=" + this.getRating() +
+                ", status=" + this.getStatus() +
+                ", title=" + this.getTitle() +
+                ", dateOfCreation=" + this.getDateOfCreation() +
+                ", notifyInstallsCount=" + this.getNotifyInstallsCount() +
+                ", notifyRating=" + this.getNotifyRating() +")";
+    }
 }
