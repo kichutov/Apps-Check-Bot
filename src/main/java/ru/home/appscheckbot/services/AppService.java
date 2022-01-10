@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @EnableScheduling
 @Service
@@ -150,8 +151,8 @@ public class AppService {
         Elements rating = document.select("div[aria-label*=Rated]");
         app.setRating(rating.text());
         // fetch app Number Of Ratings
-        //Elements numberOfRatings = document.select("span[aria-label*=ratings]");
-        //app.setNumberOfRatings(Integer.parseInt(numberOfRatings.first().text()));
+        Elements numberOfRatings = document.select("span[aria-label*=ratings]");
+        app.setNumberOfRatings(Integer.parseInt(Objects.requireNonNull(numberOfRatings.first()).text()));
         // fetch app Installs Count
         Elements installsCount = document.select("div.hAyfc:nth-child(3) > span");
         app.setInstallsCount(installsCount.text());
