@@ -127,6 +127,7 @@ public class MessageHandler {
                         return menuService.getAddNewApp(userId, textService.getText("bot.enterCorrectLink"));
                     } else {
                         App app = appService.createAppByUrl(message); // creating an App object based on the link
+                        System.out.println("RESULT OF BOOLEAN: " + appCash.existsAppByUserIdAndBundle(app.getUserId(),app.getBundle()));
                         if (appCash.existsAppByUserIdAndBundle(app.getUserId(),app.getBundle())) {
                             return menuService.getAddNewApp(userId, textService.getText("bot.appAlreadyTracked"));
                         } else {
