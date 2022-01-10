@@ -27,7 +27,7 @@ public class AppService {
     private final SendMessageService sendMessageService;
     private final MenuService menuService;
 
-    Resource userAgentsResource = new ClassPathResource("userAgents");
+    Resource userAgentsResource = new ClassPathResource("userAgents.txt");
     int countOfUserAgents;
 
     public AppService(AppCash appCash,
