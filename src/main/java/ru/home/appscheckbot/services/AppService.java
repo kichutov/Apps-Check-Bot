@@ -132,7 +132,7 @@ public class AppService {
         Document document;
         String userAgent = getRandomUserAgent();
         try {
-            document = Jsoup.connect(app.getUrl())
+            document = Jsoup.connect(app.getUrl() + "&gl=ru") // add "&gl=ru" for Russian geolocation
                     .userAgent(userAgent)
                     .referrer("https://www.google.com")
                     .get();
