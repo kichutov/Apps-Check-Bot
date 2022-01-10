@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @EnableScheduling
 @Service
@@ -56,7 +55,7 @@ public class AppService {
             String currentTitle = app.getTitle();
             String currentInstallsCount = app.getInstallsCount();
             String currentRating = app.getRating();
-            int  currentNumberOfRatings = app.getNumberOfRatings();
+            String  currentNumberOfRatings = app.getNumberOfRatings();
 
             // get updated application data
             App updatedApp = fetchDataFromGooglePlay(app);
@@ -93,7 +92,7 @@ public class AppService {
                                 updatedApp.getRating()));
                     }
                     // the Number Of Ratings has changed
-                    if (!(currentNumberOfRatings == (updatedApp.getNumberOfRatings())) && NotifyNumberOfRatings) {
+                    if (!(currentNumberOfRatings.equals(updatedApp.getNumberOfRatings())) && NotifyNumberOfRatings) {
                         notificationList.add(textService.getText("notification.numberOfRatingsHasChanged",
                                 currentNumberOfRatings,
                                 updatedApp.getNumberOfRatings()));
@@ -152,7 +151,7 @@ public class AppService {
         app.setRating(rating.text());
         // fetch app Number Of Ratings
         Elements numberOfRatings = document.select("span[aria-label*=ratings]");
-        app.setNumberOfRatings(Integer.parseInt(Objects.requireNonNull(numberOfRatings.first()).text()));
+        app.setNumberOfRatings(numberOfRatings.first().text());
         // fetch app Installs Count
         Elements installsCount = document.select("div.hAyfc:nth-child(3) > span");
         app.setInstallsCount(installsCount.text());

@@ -26,7 +26,7 @@ public class App {
     private String installsCount;
     private String rating;
     @Column(name = "number_of_ratings")
-    private Integer numberOfRatings;
+    private String numberOfRatings;
     private String status;
     private String title;
     @Column(name = "dateofcreation")
