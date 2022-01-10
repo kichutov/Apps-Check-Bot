@@ -12,7 +12,6 @@ public class MessageForDeveloper {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     @Column(name = "userid", insertable = false, updatable = false)
     private Integer userId;
     @Column(name = "message")
@@ -24,9 +23,9 @@ public class MessageForDeveloper {
     @JoinColumn(name = "userid")
     private BotUser botUser;
 
-    // пустой конструктор
+
     public MessageForDeveloper() {}
-    // конструктор из User
+
     public MessageForDeveloper(BotUser botUser, String message) {
         this.userId = botUser.getUserId();
         this.message = message;

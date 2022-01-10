@@ -13,9 +13,6 @@ import java.util.List;
 @Entity
 @Table(name = "bot_users")
 public class BotUser {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Integer id;
 
     @Id
     @Column(name = "userid")
@@ -39,9 +36,9 @@ public class BotUser {
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageForDeveloper> messages_for_developer;
 
-    // пустой конструктор
+
     public BotUser() {}
-    // конструктор из User
+
     public BotUser(User user) {
         this.userId = user.getId();
         this.userName = user.getUserName();
@@ -49,7 +46,6 @@ public class BotUser {
         this.lastName = user.getLastName();
         this.isBot = user.getBot();
         this.languageCode = user.getLanguageCode();
-
         this.dateOfCreation = new Date();
     }
 

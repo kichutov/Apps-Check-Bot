@@ -7,21 +7,20 @@ import org.springframework.stereotype.Service;
 import java.util.Locale;
 
 @Service
-public class LocaleMessageService {
+public class TextService {
     private final Locale locale;
     private final MessageSource messageSource;
 
-    public LocaleMessageService(@Value("ru-RU") String localeTag, MessageSource messageSource) {
+    public TextService(@Value("ru-RU") String localeTag, MessageSource messageSource) {
         this.locale = Locale.forLanguageTag(localeTag);
         this.messageSource = messageSource;
     }
 
-    // Возвращает сообщение из файла messages_***_***.properties
-    public String getMessage(String message) {
+    public String getText(String message) {
         return messageSource.getMessage(message, null, locale);
     }
-    // Возвращает сообщение из файла messages_***_***.properties (с передачей доп. аргументов)
-    public String getMessage(String message, Object... args) {
+
+    public String getText(String message, Object... args) {
         return messageSource.getMessage(message, args, locale);
     }
 }

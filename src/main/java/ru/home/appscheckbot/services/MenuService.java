@@ -6,16 +6,17 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.home.appscheckbot.DAO.AppDAO;
 import ru.home.appscheckbot.DAO.BotUserDAO;
+import ru.home.appscheckbot.cache.AppCash;
 import ru.home.appscheckbot.models.App;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Getter
@@ -24,233 +25,143 @@ public class MenuService {
 
     private final BotUserDAO botUserDAO;
     private final AppDAO appDAO;
-    private final LocaleMessageService localeMessageService;
+    private final TextService textService;
+    private final AppCash appCash;
 
     public MenuService(BotUserDAO botUserDAO,
-                       AppDAO appDAO, LocaleMessageService localeMessageService) {
+                       AppDAO appDAO,
+                       TextService textService,
+                       AppCash appCash) {
         this.botUserDAO = botUserDAO;
         this.appDAO = appDAO;
-        this.localeMessageService = localeMessageService;
+        this.textService = textService;
+        this.appCash = appCash;
     }
 
-    public SendMessage getMainMenu(final int chatId, final String textMessage, final int userId) {
-
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
-
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        KeyboardRow row1 = new KeyboardRow();
-        KeyboardRow row2 = new KeyboardRow();
-        row1.add(new KeyboardButton(localeMessageService.getMessage("fromUser.myApps")));
-        row2.add(new KeyboardButton(localeMessageService.getMessage("fromUser.writeToDeveloper")));
-        keyboard.add(row1);
-        keyboard.add(row2);
-
-        replyKeyboardMarkup.setKeyboard(keyboard);
-
-        return createMessageWithKeyboard(chatId, textMessage, replyKeyboardMarkup);
+    public SendMessage getMainMenu(int userId) {
+        List<String> buttons = new ArrayList<>();
+        buttons.add(textService.getText("user.myApps"));
+        buttons.add(textService.getText("user.writeToDeveloper"));
+        ReplyKeyboardMarkup replyKeyboardMarkup = buildReplyKeyboardMarkup(buttons);
+        return createMessageWithKeyboard(userId, textService.getText("bot.mainMenu"), replyKeyboardMarkup);
     }
 
-    public SendMessage getWriteToDeveloper(final int chatId, final String textMessage, final int userId) {
-
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
-
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton(localeMessageService.getMessage("fromUser.goBackToMainMenu")));
-        keyboard.add(row1);
-
-        replyKeyboardMarkup.setKeyboard(keyboard);
-
-        return createMessageWithKeyboard(chatId, textMessage, replyKeyboardMarkup);
+    public SendMessage getWriteToDeveloper(int userId, String textMessage) {
+        List<String> buttons = new ArrayList<>();
+        buttons.add(textService.getText("user.goBackToMainMenu"));
+        ReplyKeyboardMarkup replyKeyboardMarkup = buildReplyKeyboardMarkup(buttons);
+        return createMessageWithKeyboard(userId, textMessage, replyKeyboardMarkup);
     }
 
-    public SendMessage getAddNewApp(final int chatId, final String textMessage, final int userId) {
-
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
-
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton(localeMessageService.getMessage("fromUser.goBackToMyApps")));
-        keyboard.add(row1);
-
-        replyKeyboardMarkup.setKeyboard(keyboard);
-
-        return createMessageWithKeyboard(chatId, textMessage, replyKeyboardMarkup);
+    public SendMessage getAddNewApp(int userId, String textMessage) {
+        List<String> buttons = new ArrayList<>();
+        buttons.add(textService.getText("user.goBackToMyApps"));
+        ReplyKeyboardMarkup replyKeyboardMarkup = buildReplyKeyboardMarkup(buttons);
+        return createMessageWithKeyboard(userId, textMessage, replyKeyboardMarkup);
     }
 
-    public SendMessage getMyAppsMenu(final int chatId, final String textMessage, final int userId) {
-        // Создаём финальную клавиатуру
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        // Задаём настройки клавиатуры
-        replyKeyboardMarkup.setResizeKeyboard(true); // изменяем размер, делаем меньше
-        // Создаём список строк
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        // Создаём строки для кнопки Назад и Добавить приложение
-        KeyboardRow keyboardRow1 = new KeyboardRow();
-        KeyboardRow keyboardRow2 = new KeyboardRow();
-        // Добавляем кнопки Назад и Добавить приложение в строки
-        keyboardRow1.add(new KeyboardButton(localeMessageService.getMessage("fromUser.goBackToMainMenu")));
-        keyboardRow2.add(new KeyboardButton(localeMessageService.getMessage("fromUser.addApp")));
-        // Добавляем строку назад в список строк
-        keyboard.add(keyboardRow1);
-        keyboard.add(keyboardRow2);
-
-        // Из базы данных достаём список приложений пользователя
-        List<App> appsList = appDAO.findAllAppsByUserId(userId);
-        // Вставляем кнопки для каждого приложения из списка
-        for (int i = 0; i < appsList.size(); i++) {
-            KeyboardRow keyboardRowForAppsList = new KeyboardRow();
-            // Формируем надпись на кнопках
-            String appTitle;
-            String appBundle;
-            String appInstallsCount;
-
-            // Обрабатываем ситуацию, когда приложение ещё не опубликовано в Google Play
-            if (appsList.get(i).getStatus().equals(localeMessageService.getMessage("appStatus.moderated"))) {
+    public SendMessage getMyAppsMenu(int userId, String textMessage) {
+        List<App> appsList = appCash.findAllAppsByUserId(userId);
+        List<String> appButtons = new ArrayList<>();
+        // creating buttons for each app from the list
+        for (App app : appsList) {
+            String appTitle, appBundle, appInstallsCount;
+            // if the app has not been published on Google Play yet
+            if (app.getStatus().equals(textService.getText("appStatus.moderated"))) {
                 appTitle = "";
-                appBundle = appsList.get(i).getBundle();
+                appBundle = app.getBundle();
                 appInstallsCount = "";
             } else {
-                appTitle = appsList.get(i).getTitle();
-                appBundle = appsList.get(i).getBundle();
-                appInstallsCount = appsList.get(i).getInstallsCount();
+                appTitle = app.getTitle();
+                appBundle = app.getBundle();
+                appInstallsCount = app.getInstallsCount();
             }
-
-            String title = String.format("%s (%s) %s %s",
-                    appTitle,
-                    appBundle,
-                    appInstallsCount,
-                    appsList.get(i).getStatus());
-            keyboardRowForAppsList.add(new KeyboardButton(title));
-            keyboard.add(keyboardRowForAppsList);
+            String title = String.format("%s (%s) %s %s", appTitle, appBundle, appInstallsCount, app.getStatus());
+            appButtons.add(title);
         }
-
-        // Устанавливаем разметку в финальную клавиатуру
-        replyKeyboardMarkup.setKeyboard(keyboard);
-
-        return createMessageWithKeyboard(chatId, textMessage, replyKeyboardMarkup);
+        List<String> allButtonsList = new ArrayList<>();
+        allButtonsList.add(textService.getText("user.goBackToMainMenu"));
+        allButtonsList.add(textService.getText("user.addApp"));
+        allButtonsList.addAll(appButtons);
+        ReplyKeyboardMarkup replyKeyboardMarkup = buildReplyKeyboardMarkup(allButtonsList);
+        return createMessageWithKeyboard(userId, textMessage, replyKeyboardMarkup);
     }
 
-    public SendMessage getAppMainMenu(Message message, App app, String textMessage) {
-
-        // Создаём финальную клавиатуру для сообщения
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-
-        // Создаём список строк
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-
-        // Создаём строки
-        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
-        // В каждую строку добавляем 1 кнопку
-        keyboardButtonsRow1.add(new InlineKeyboardButton().setText(localeMessageService.getMessage("fromUser.notifications")).setCallbackData("notifications:" + app.getBundle()));
-        keyboardButtonsRow2.add(new InlineKeyboardButton().setText(localeMessageService.getMessage("fromUser.stopTracking")).setCallbackData("delete:" + app.getBundle()));
-        // Добавляем строки в список строк
-        keyboard.add(keyboardButtonsRow1);
-        keyboard.add(keyboardButtonsRow2);
-
-        // Устанавливаем разметку в финальную клавиатуру
-        inlineKeyboardMarkup.setKeyboard(keyboard);
-
-        return createMessageWithInlineKeyboard(message.getChatId(), textMessage, inlineKeyboardMarkup);
+    public SendMessage getAppMainMenu(Message message, App app) {
+        String textMessage = textService.getText("bot.appMainMenu",
+                app.getTitle() == null || app.getTitle().equals("") ? app.getBundle() : app.getTitle(),
+                app.getUrl(),
+                app.getStatus(),
+                app.getBundle(),
+                app.getInstallsCount() == null || app.getInstallsCount().equals("") ? "-" : app.getInstallsCount(),
+                app.getRating() == null || app.getRating().equals("") ? "-" : app.getRating(),
+                app.getNumberOfRatings() == null ? "-" : app.getNumberOfRatings());
+        InlineKeyboardMarkup inlineKeyboardMarkup = getAppMainKeyboard(app);
+        return createMessageWithKeyboard(message.getFrom().getId(), textMessage, inlineKeyboardMarkup);
     }
 
     public InlineKeyboardMarkup getAppMainKeyboard(App app) {
-
-        // Создаём финальную клавиатуру для сообщения
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-
-        // Создаём список строк
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-
-        // Создаём строки
-        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
-        // В каждую строку добавляем 1 кнопку
-        keyboardButtonsRow1.add(new InlineKeyboardButton().setText(localeMessageService.getMessage("fromUser.notifications")).setCallbackData("notifications:" + app.getBundle()));
-        keyboardButtonsRow2.add(new InlineKeyboardButton().setText(localeMessageService.getMessage("fromUser.stopTracking")).setCallbackData("delete:" + app.getBundle()));
-        // Добавляем строки в список строк
-        keyboard.add(keyboardButtonsRow1);
-        keyboard.add(keyboardButtonsRow2);
-
-        // Устанавливаем разметку в финальную клавиатуру
-        inlineKeyboardMarkup.setKeyboard(keyboard);
-
-        return inlineKeyboardMarkup;
+        Map<String, String> callbackButtonsMap = new LinkedHashMap<>();
+        callbackButtonsMap.put(textService.getText("user.notifications"), "notifications:" + app.getBundle());
+        callbackButtonsMap.put(textService.getText("user.stopTracking"), "delete:" + app.getBundle());
+        return buildInlineKeyboardMarkup(callbackButtonsMap);
     }
 
     public InlineKeyboardMarkup getAppNotificationKeyboard(App app) {
-
-        // Создаём финальную клавиатуру для сообщения
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-
-        // Создаём список строк
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-
-        // Создаём строки
-        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
-        List<InlineKeyboardButton> keyboardButtonsRow3 = new ArrayList<>();
-
-        // Получаем данные из Базы об уже установленных состояниях Notification
         Boolean notifyInstallsCount = app.getNotifyInstallsCount();
         Boolean notifyRating = app.getNotifyRating();
-        String checkEmoji = localeMessageService.getMessage("emoji.check");
+        Boolean notifyNumberOfRatings = app.getNotifyNumberOfRatings();
+        String checkEmoji = textService.getText("emoji.check");
 
-        // В каждую строку добавляем 1 кнопку
-        keyboardButtonsRow1.add(new InlineKeyboardButton().setText((notifyInstallsCount == true ? checkEmoji : "") + " " + localeMessageService.getMessage("fromUser.changingInstallsCount")).setCallbackData("notifyInstallsCount:" + app.getBundle()));
-        keyboardButtonsRow2.add(new InlineKeyboardButton().setText((notifyRating == true ? checkEmoji : "") + " " + localeMessageService.getMessage("fromUser.changingRating")).setCallbackData("notifyRating:" + app.getBundle()));
-        keyboardButtonsRow3.add(new InlineKeyboardButton().setText(localeMessageService.getMessage("fromUser.goBack")).setCallbackData("goAppMainMenu:" + app.getBundle()));
-        // Добавляем строки в список строк
-        keyboard.add(keyboardButtonsRow1);
-        keyboard.add(keyboardButtonsRow2);
-        keyboard.add(keyboardButtonsRow3);
-
-        // Устанавливаем разметку в финальную клавиатуру
-        inlineKeyboardMarkup.setKeyboard(keyboard);
-
-        return inlineKeyboardMarkup;
+        Map<String, String> callbackButtonsMap = new LinkedHashMap<>();
+        callbackButtonsMap.put(textService.getText("user.goBack"), "goAppMainMenu:" + app.getBundle());
+        callbackButtonsMap.put((notifyInstallsCount ? checkEmoji + " " : "") + textService.getText("user.changingInstallsCount"),
+                "notifyInstallsCount:" + app.getBundle());
+        callbackButtonsMap.put((notifyRating ? checkEmoji + " " : "") + textService.getText("user.changingRating"),
+                "notifyRating:" + app.getBundle());
+        callbackButtonsMap.put((notifyNumberOfRatings ? checkEmoji + " " : "") + textService.getText("user.changingNumberOfRatings"),
+                "notifyNumberOfRatings:" + app.getBundle());
+        return buildInlineKeyboardMarkup(callbackButtonsMap);
     }
 
-    private SendMessage createMessageWithInlineKeyboard(final long chatId,
-                                                  String textMessage,
-                                                  final InlineKeyboardMarkup inlineKeyboardMarkup) {
+    private SendMessage createMessageWithKeyboard(int userId, String textMessage, ReplyKeyboard replyKeyboard) {
         final SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setParseMode("html");
-        sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setChatId(String.valueOf(userId));
         sendMessage.setText(textMessage);
-        if (inlineKeyboardMarkup != null) {
-            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        if (replyKeyboard != null) {
+            sendMessage.setReplyMarkup(replyKeyboard);
         }
         return sendMessage;
     }
 
-    private SendMessage createMessageWithKeyboard(final long chatId,
-                                                  String textMessage,
-                                                  final ReplyKeyboardMarkup replyKeyboardMarkup) {
-        final SendMessage sendMessage = new SendMessage();
-        sendMessage.enableMarkdown(true);
-        sendMessage.setParseMode("html");
-        sendMessage.setChatId(String.valueOf(chatId));
-        sendMessage.setText(textMessage);
-        if (replyKeyboardMarkup != null) {
-            sendMessage.setReplyMarkup(replyKeyboardMarkup);
+    private ReplyKeyboardMarkup buildReplyKeyboardMarkup(List<String> buttons) {
+        List<KeyboardRow> keyboard = new ArrayList<>(buttons.size());
+        for (String buttonText : buttons) {
+            KeyboardRow row = new KeyboardRow();
+            row.add(new KeyboardButton(buttonText));
+            keyboard.add(row);
         }
-        return sendMessage;
+        return new ReplyKeyboardMarkup()
+                .setSelective(true)
+                .setResizeKeyboard(true)
+                .setOneTimeKeyboard(false)
+                .setKeyboard(keyboard);
+    }
+
+    private InlineKeyboardMarkup buildInlineKeyboardMarkup(Map<String, String> callbackButtonsMap) {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>(callbackButtonsMap.size());
+        for (Map.Entry<String, String> callbackButton : callbackButtonsMap.entrySet()) {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton()
+                    .setText(callbackButton.getKey())
+                    .setCallbackData(callbackButton.getValue());
+            List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+            keyboardButtonsRow.add(inlineKeyboardButton);
+            keyboard.add(keyboardButtonsRow);
+        }
+        return new InlineKeyboardMarkup().setKeyboard(keyboard);
+
     }
 
 

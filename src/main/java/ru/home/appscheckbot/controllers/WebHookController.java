@@ -1,6 +1,5 @@
 package ru.home.appscheckbot.controllers;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -9,7 +8,6 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.home.appscheckbot.TelegramBot;
 
-@Slf4j
 @RestController
 public class WebHookController {
 

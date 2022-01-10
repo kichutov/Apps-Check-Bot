@@ -2,6 +2,7 @@ package ru.home.appscheckbot.models;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
 @Setter
 @Entity
 @Table(name = "apps")
+@Component
 public class App {
 
     @Id
@@ -23,6 +25,8 @@ public class App {
     @Column(name = "installscount")
     private String installsCount;
     private String rating;
+    @Column(name = "number_of_ratings")
+    private Integer numberOfRatings;
     private String status;
     private String title;
     @Column(name = "dateofcreation")
@@ -31,18 +35,31 @@ public class App {
     private Boolean notifyInstallsCount;
     @Column(name = "notify_rating")
     private Boolean notifyRating;
+    @Column(name = "notify_number_of_ratings")
+    private Boolean notifyNumberOfRatings;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userid")
     private BotUser botUser;
 
     public App() {
-        this.status = "moderated";
         this.dateOfCreation = new Date();
         this.notifyInstallsCount = true;
         this.notifyRating = true;
+        this.notifyNumberOfRatings = true;
     }
 
+    public void changeNotifyInstallsCount() {
+        this.notifyInstallsCount = !this.notifyInstallsCount;
+    }
+    public void changeNotifyRating() {
+        this.notifyRating = !this.notifyRating;
+    }
+    public void changeNotifyNumberOfRatings() {
+        this.notifyNumberOfRatings = !this.notifyNumberOfRatings;
+    }
+
+    // don't delete
     public String toString() {
         return "App(id=" + this.getId() +
                 ", userId=" + this.getUserId() +
@@ -50,10 +67,12 @@ public class App {
                 ", bundle=" + this.getBundle() +
                 ", installsCount=" + this.getInstallsCount() +
                 ", rating=" + this.getRating() +
+                ", numberOfRatings=" + this.getNumberOfRatings() +
                 ", status=" + this.getStatus() +
                 ", title=" + this.getTitle() +
                 ", dateOfCreation=" + this.getDateOfCreation() +
                 ", notifyInstallsCount=" + this.getNotifyInstallsCount() +
-                ", notifyRating=" + this.getNotifyRating() +")";
+                ", notifyRating=" + this.getNotifyRating() +
+                ", notifyNumberOfRatings=" + this.getNotifyNumberOfRatings() + ")";
     }
 }

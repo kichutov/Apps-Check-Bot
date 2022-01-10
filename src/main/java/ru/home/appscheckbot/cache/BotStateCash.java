@@ -12,10 +12,9 @@ import java.util.Map;
 @Setter
 @Getter
 public class BotStateCash {
-    // HashMap для состояний бота у каждого пользователя
+
     private Map<Integer, BotState> botStateMap = new HashMap<>();
 
-    // Метод устанавливаем состояние бота для определённого юзера
     public void saveBotState(int userId, BotState botState) {
         botStateMap.put(userId, botState);
     }
