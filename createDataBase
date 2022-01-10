@@ -1,0 +1,35 @@
+create table apps
+(
+    id                       integer not null,
+    userid                   integer,
+    url                      varchar(100),
+    bundle                   varchar(50),
+    installscount            varchar(30),
+    rating                   varchar(10),
+    status                   varchar(30),
+    title                    varchar(50),
+    dateofcreation           timestamp,
+    notify_installs_count    boolean,
+    notify_rating            boolean,
+    number_of_ratings        integer,
+    notify_number_of_ratings boolean
+);
+
+create table bot_users
+(
+    userid         integer not null,
+    username       varchar,
+    firstname      varchar,
+    lastname       varchar,
+    isbot          varchar,
+    languagecode   varchar,
+    dateofcreation timestamp
+);
+
+create table messages_for_developer
+(
+    id      serial,
+    userid  integer,
+    message varchar,
+    date    timestamp
+);
