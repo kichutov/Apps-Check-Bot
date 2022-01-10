@@ -151,7 +151,14 @@ public class AppService {
         app.setRating(rating.text());
         // fetch app Number Of Ratings
         Elements numberOfRatings = document.select("span[aria-label*=ratings]");
-        app.setNumberOfRatings(numberOfRatings.first().text());
+        // FIX IT LATER!!!
+        try {
+            app.setNumberOfRatings(numberOfRatings.first().text());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            app.setNumberOfRatings("-");
+        }
         // fetch app Installs Count
         Elements installsCount = document.select("div.hAyfc:nth-child(3) > span");
         app.setInstallsCount(installsCount.text());
