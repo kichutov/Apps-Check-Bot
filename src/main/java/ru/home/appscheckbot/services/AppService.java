@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.home.appscheckbot.DAO.AppDAO;
 import ru.home.appscheckbot.cache.AppCash;
 import ru.home.appscheckbot.models.App;
 import ru.home.appscheckbot.models.BotUser;
@@ -26,6 +27,7 @@ public class AppService {
     private final TextService textService;
     private final SendMessageService sendMessageService;
     private final MenuService menuService;
+    private final AppDAO appDAO;
 
     Resource userAgentsResource = new ClassPathResource("userAgents.txt");
     int countOfUserAgents;
@@ -33,11 +35,13 @@ public class AppService {
     public AppService(AppCash appCash,
                       TextService textService,
                       SendMessageService sendMessageService,
-                      MenuService menuService) {
+                      MenuService menuService,
+                      AppDAO appDAO) {
         this.appCash = appCash;
         this.textService = textService;
         this.sendMessageService = sendMessageService;
         this.menuService = menuService;
+        this.appDAO = appDAO;
     }
 
     // repeat every 5 minutes
@@ -45,35 +49,35 @@ public class AppService {
     private void updateDataFromGooglePlay() {
         this.countOfUserAgents = getCountOfUserAgents(); // read the number of UserAgents in the file
         List<App> appCashList = appCash.getAppCashList(); // get all apps from Cash
-        for (App app : appCashList) {
-            Boolean isNotifyInstallsCount = app.getNotifyInstallsCount();
-            Boolean isNotifyRating = app.getNotifyRating();
-            Boolean NotifyNumberOfRatings = app.getNotifyNumberOfRatings();
+        for (App appFromCash : appCashList) {
+            Boolean isNotifyInstallsCount = appFromCash.getNotifyInstallsCount();
+            Boolean isNotifyRating = appFromCash.getNotifyRating();
+            Boolean NotifyNumberOfRatings = appFromCash.getNotifyNumberOfRatings();
 
             // old application data
-            String currentStatus = app.getStatus();
-            String currentTitle = app.getTitle();
-            String currentInstallsCount = app.getInstallsCount();
-            String currentRating = app.getRating();
-            String  currentNumberOfRatings = app.getNumberOfRatings();
+            String currentStatus = appFromCash.getStatus();
+            String currentTitle = appFromCash.getTitle();
+            String currentInstallsCount = appFromCash.getInstallsCount();
+            String currentRating = appFromCash.getRating();
+            String currentNumberOfRatings = appFromCash.getNumberOfRatings();
 
             // get updated application data
-            App updatedApp = fetchDataFromGooglePlay(app);
+            App updatedApp = fetchDataFromGooglePlay(appFromCash);
 
             List<String> notificationList = new ArrayList<>();
 
-            // if the app is no longer available on Google Play
+            // if the appFromCash is no longer available on Google Play
             if (updatedApp.getStatus().equals(textService.getText("appStatus.died")) &&
                     currentStatus.equals(textService.getText("appStatus.tracked"))) {
                 notificationList.add(textService.getText("notification.appHasBeenRemoved"));
             }
-            // if the app is available on Google Play
+            // if the appFromCash is available on Google Play
             else if (updatedApp.getStatus().equals(textService.getText("appStatus.tracked"))) {
                 // if the application has passed moderation
                 if (currentStatus.equals(textService.getText("appStatus.moderated"))) {
                     notificationList.add(textService.getText("notification.appHasPassedModeration"));
                 }
-                // if the app has become available on Google Play again
+                // if the appFromCash has become available on Google Play again
                 else if (currentStatus.equals(textService.getText("appStatus.died"))) {
                     notificationList.add(textService.getText("notification.appIsAvailableAgain"));
                 }
@@ -113,17 +117,20 @@ public class AppService {
                 }
                 message.append("\n");
                 message.append(textService.getText("bot.appMainMenu",
-                        app.getTitle() == null || app.getTitle().equals("") ? app.getBundle() : app.getTitle(),
-                        app.getUrl(),
-                        app.getStatus(),
-                        app.getBundle(),
-                        app.getInstallsCount() == null || app.getInstallsCount().equals("") ? "-" : app.getInstallsCount(),
-                        app.getRating() == null || app.getRating().equals("") ? "-" : app.getRating(),
-                        app.getNumberOfRatings() == null ? "-" : app.getNumberOfRatings()));
-                sendMessageService.SendMessageWithKeyboard(app.getUserId().toString(),
+                        appFromCash.getTitle() == null || appFromCash.getTitle().equals("") ? appFromCash.getBundle() : appFromCash.getTitle(),
+                        appFromCash.getUrl(),
+                        appFromCash.getStatus(),
+                        appFromCash.getBundle(),
+                        appFromCash.getInstallsCount() == null || appFromCash.getInstallsCount().equals("") ? "-" : appFromCash.getInstallsCount(),
+                        appFromCash.getRating() == null || appFromCash.getRating().equals("") ? "-" : appFromCash.getRating(),
+                        appFromCash.getNumberOfRatings() == null ? "-" : appFromCash.getNumberOfRatings()));
+                sendMessageService.SendMessageWithKeyboard(appFromCash.getUserId().toString(),
                         message.toString(),
-                        menuService.getAppMainKeyboard(app));
+                        menuService.getAppMainKeyboard(appFromCash));
             }
+
+            appFromCash.updateData(updatedApp);
+            appDAO.saveApp(updatedApp);
         }
     }
 

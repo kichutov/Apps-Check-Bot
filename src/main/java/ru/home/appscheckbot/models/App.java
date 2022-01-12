@@ -58,6 +58,13 @@ public class App {
     public void changeNotifyNumberOfRatings() {
         this.notifyNumberOfRatings = !this.notifyNumberOfRatings;
     }
+    public void updateData(App updatedApp) {
+        this.status = updatedApp.getStatus();
+        this.title = updatedApp.getTitle();
+        this.installsCount = updatedApp.getInstallsCount();
+        this.rating = updatedApp.getRating();
+        this.numberOfRatings = updatedApp.getNumberOfRatings();
+    }
 
     // don't delete
     public String toString() {
