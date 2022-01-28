@@ -11,7 +11,7 @@ import java.util.Map;
 @Service
 @Setter
 @Getter
-public class BotStateCash {
+public class BotStateCache {
 
     private Map<Integer, BotState> botStateMap = new HashMap<>();
 

@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.home.appscheckbot.DAO.AppDAO;
-import ru.home.appscheckbot.cache.AppCash;
+import ru.home.appscheckbot.cache.AppCache;
 import ru.home.appscheckbot.models.App;
 import ru.home.appscheckbot.models.BotUser;
 
@@ -23,7 +23,7 @@ import java.util.List;
 @Service
 public class AppService {
 
-    private final AppCash appCash;
+    private final AppCache appCache;
     private final TextService textService;
     private final SendMessageService sendMessageService;
     private final MenuService menuService;
@@ -32,12 +32,12 @@ public class AppService {
     Resource userAgentsResource = new ClassPathResource("userAgents.txt");
     int countOfUserAgents;
 
-    public AppService(AppCash appCash,
+    public AppService(AppCache appCache,
                       TextService textService,
                       SendMessageService sendMessageService,
                       MenuService menuService,
                       AppDAO appDAO) {
-        this.appCash = appCash;
+        this.appCache = appCache;
         this.textService = textService;
         this.sendMessageService = sendMessageService;
         this.menuService = menuService;
@@ -48,7 +48,7 @@ public class AppService {
     @Scheduled(fixedDelay = 300000)
     private void updateDataFromGooglePlay() {
         this.countOfUserAgents = getCountOfUserAgents(); // read the number of UserAgents in the file
-        List<App> appCashList = appCash.getAppCashList(); // get all apps from Cash
+        List<App> appCashList = appCache.getAppCashList(); // get all apps from Cash
         for (App appFromCash : appCashList) {
             Boolean isNotifyInstallsCount = appFromCash.getNotifyInstallsCount();
             Boolean isNotifyRating = appFromCash.getNotifyRating();

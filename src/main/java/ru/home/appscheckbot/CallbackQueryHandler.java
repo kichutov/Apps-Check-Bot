@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import ru.home.appscheckbot.DAO.AppDAO;
-import ru.home.appscheckbot.cache.AppCash;
+import ru.home.appscheckbot.cache.AppCache;
 import ru.home.appscheckbot.models.App;
 import ru.home.appscheckbot.services.MenuService;
 import ru.home.appscheckbot.services.TextService;
@@ -17,16 +17,16 @@ public class CallbackQueryHandler {
     private final MenuService menuService;
     private final AppDAO appDAO;
     private final TextService textService;
-    private final AppCash appCash;
+    private final AppCache appCache;
 
     public CallbackQueryHandler(MenuService menuService,
                                 AppDAO appDAO,
                                 TextService textService,
-                                AppCash appCash) {
+                                AppCache appCache) {
         this.menuService = menuService;
         this.appDAO = appDAO;
         this.textService = textService;
-        this.appCash = appCash;
+        this.appCache = appCache;
     }
 
     public BotApiMethod<?> processCallbackQuery(CallbackQuery buttonQuery) {
@@ -41,12 +41,12 @@ public class CallbackQueryHandler {
         String task = callbackData.substring(0, callbackData.indexOf(':')); // get command from Callback
         String bundle = callbackData.substring(callbackData.indexOf(':') + 1); // get app bundle from Callback
 
-        if (!appCash.existsAppByUserIdAndBundle(userId, bundle)) {
+        if (!appCache.existsAppByUserIdAndBundle(userId, bundle)) {
             callBackAnswer.setText(textService.getText("bot.appIsNotTracked"));
             return callBackAnswer;
         }
 
-        App app = appCash.findAppByUserIdAndBundle(userId, bundle);
+        App app = appCache.findAppByUserIdAndBundle(userId, bundle);
         EditMessageText newMessage = new EditMessageText()
                 .setChatId(String.valueOf(userId))
                 .setParseMode("html")
@@ -63,7 +63,7 @@ public class CallbackQueryHandler {
         switch (task) {
 
             case ("delete"):
-                appCash.removeAppFromCash(app);
+                appCache.removeAppFromCash(app);
                 appDAO.deleteApp(app);
                 callBackAnswer.setText(textService.getText("bot.stoppedTrackingApp"));
                 return callBackAnswer;

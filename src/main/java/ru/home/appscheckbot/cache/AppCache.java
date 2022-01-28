@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 @Getter
 @ToString
 @Component
-public class AppCash {
+public class AppCache {
 
     private List<App> appCashList;
 
-    public AppCash(AppDAO appDAO) {
+    public AppCache(AppDAO appDAO) {
         this.appCashList = appDAO.getAllApps();
     }
 

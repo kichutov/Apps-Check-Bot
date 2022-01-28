@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.home.appscheckbot.DAO.AppDAO;
 import ru.home.appscheckbot.DAO.BotUserDAO;
-import ru.home.appscheckbot.cache.AppCash;
+import ru.home.appscheckbot.cache.AppCache;
 import ru.home.appscheckbot.models.App;
 
 import java.util.*;
@@ -26,16 +26,16 @@ public class MenuService {
     private final BotUserDAO botUserDAO;
     private final AppDAO appDAO;
     private final TextService textService;
-    private final AppCash appCash;
+    private final AppCache appCache;
 
     public MenuService(BotUserDAO botUserDAO,
                        AppDAO appDAO,
                        TextService textService,
-                       AppCash appCash) {
+                       AppCache appCache) {
         this.botUserDAO = botUserDAO;
         this.appDAO = appDAO;
         this.textService = textService;
-        this.appCash = appCash;
+        this.appCache = appCache;
     }
 
     public SendMessage getMainMenu(int userId) {
@@ -61,7 +61,7 @@ public class MenuService {
     }
 
     public SendMessage getMyAppsMenu(int userId, String textMessage) {
-        List<App> appsList = appCash.findAllAppsByUserId(userId);
+        List<App> appsList = appCache.findAllAppsByUserId(userId);
         List<String> appButtons = new ArrayList<>();
         // creating buttons for each app from the list
         for (App app : appsList) {

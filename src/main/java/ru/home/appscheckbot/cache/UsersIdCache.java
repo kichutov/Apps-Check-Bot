@@ -6,11 +6,11 @@ import ru.home.appscheckbot.DAO.BotUserDAO;
 import java.util.Set;
 
 @Component
-public class UsersIdCash {
+public class UsersIdCache {
 
     private Set<Integer> usersIdCashSet;
 
-    public UsersIdCash(BotUserDAO botUserDAO) {
+    public UsersIdCache(BotUserDAO botUserDAO) {
         this.usersIdCashSet = botUserDAO.getUsersIdSet();
     }
 

@@ -6,21 +6,21 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.home.appscheckbot.botApi.BotState;
-import ru.home.appscheckbot.cache.BotStateCash;
+import ru.home.appscheckbot.cache.BotStateCache;
 
 @Component
 public class TelegramFacade {
 
     private final MessageHandler messageHandler;
     private final CallbackQueryHandler callbackQueryHandler;
-    private final BotStateCash botStateCash;
+    private final BotStateCache botStateCache;
 
     public TelegramFacade(MessageHandler messageHandler,
                           CallbackQueryHandler callbackQueryHandler,
-                          BotStateCash botStateCash) {
+                          BotStateCache botStateCache) {
         this.messageHandler = messageHandler;
         this.callbackQueryHandler = callbackQueryHandler;
-        this.botStateCash = botStateCash;
+        this.botStateCache = botStateCache;
     }
 
     public BotApiMethod<?> handleUpdate(Update update) {
@@ -68,12 +68,12 @@ public class TelegramFacade {
                 break;
 
             default:
-                botState = botStateCash.getBotStateMap().get(message.getFrom().getId()) == null?
-                        BotState.START: botStateCash.getBotStateMap().get(message.getFrom().getId());
+                botState = botStateCache.getBotStateMap().get(message.getFrom().getId()) == null?
+                        BotState.START: botStateCache.getBotStateMap().get(message.getFrom().getId());
         }
 
         // saving the state of the bot in botStateCash for this userId
-        botStateCash.saveBotState(userId, botState);
+        botStateCache.saveBotState(userId, botState);
 
         return messageHandler.handle(message, botState);
 

@@ -7,8 +7,8 @@ import ru.home.appscheckbot.DAO.AppDAO;
 import ru.home.appscheckbot.DAO.BotUserDAO;
 import ru.home.appscheckbot.DAO.MessageForDeveloperDAO;
 import ru.home.appscheckbot.botApi.BotState;
-import ru.home.appscheckbot.cache.AppCash;
-import ru.home.appscheckbot.cache.UsersIdCash;
+import ru.home.appscheckbot.cache.AppCache;
+import ru.home.appscheckbot.cache.UsersIdCache;
 import ru.home.appscheckbot.models.App;
 import ru.home.appscheckbot.models.BotUser;
 import ru.home.appscheckbot.models.MessageForDeveloper;
@@ -29,8 +29,8 @@ public class MessageHandler {
     private final MenuService menuService;
     private final TextService textService;
     private final AppService appService;
-    private final UsersIdCash usersIdCash;
-    private final AppCash appCash;
+    private final UsersIdCache usersIdCache;
+    private final AppCache appCache;
     private final MessageForDeveloperService messageForDeveloperService;
 
     public MessageHandler(AppDAO appDAO,
@@ -39,8 +39,8 @@ public class MessageHandler {
                           MenuService menuService,
                           TextService textService,
                           AppService appService,
-                          UsersIdCash usersIdCash,
-                          AppCash appCash,
+                          UsersIdCache usersIdCache,
+                          AppCache appCache,
                           MessageForDeveloperService messageForDeveloperService) {
         this.appDAO = appDAO;
         this.botUserDAO = botUserDAO;
@@ -48,8 +48,8 @@ public class MessageHandler {
         this.menuService = menuService;
         this.textService = textService;
         this.appService = appService;
-        this.usersIdCash = usersIdCash;
-        this.appCash = appCash;
+        this.usersIdCache = usersIdCache;
+        this.appCache = appCache;
         this.messageForDeveloperService = messageForDeveloperService;
     }
 
@@ -59,9 +59,9 @@ public class MessageHandler {
         BotUser botUser = new BotUser(message.getFrom());
 
         // if the user writes for the first time
-        Set<Integer> usersIdCashSet = usersIdCash.getUsersIdCashSet();
+        Set<Integer> usersIdCashSet = usersIdCache.getUsersIdCashSet();
         if (!usersIdCashSet.contains(userId)) {
-            usersIdCash.addUserIdToCash(userId);
+            usersIdCache.addUserIdToCash(userId);
             botUserDAO.saveBotUser(botUser);
         }
 
@@ -85,7 +85,7 @@ public class MessageHandler {
 
             case ("MY_APPS"):
                 // if the user clicked on button with name of app
-                List<App> appList = appCash.findAllAppsByUserId(userId);
+                List<App> appList = appCache.findAllAppsByUserId(userId);
                 for (App app : appList) {
                     if (message.getText().contains(app.getBundle())) {
                         return menuService.getAppMainMenu(message, app);
@@ -127,11 +127,11 @@ public class MessageHandler {
                         return menuService.getAddNewApp(userId, textService.getText("bot.enterCorrectLink"));
                     } else {
                         App app = appService.createAppByUrl(message); // creating an App object based on the link
-                        System.out.println("RESULT OF BOOLEAN: " + appCash.existsAppByUserIdAndBundle(app.getUserId(),app.getBundle()));
-                        if (appCash.existsAppByUserIdAndBundle(app.getUserId(),app.getBundle())) {
+                        System.out.println("RESULT OF BOOLEAN: " + appCache.existsAppByUserIdAndBundle(app.getUserId(),app.getBundle()));
+                        if (appCache.existsAppByUserIdAndBundle(app.getUserId(),app.getBundle())) {
                             return menuService.getAddNewApp(userId, textService.getText("bot.appAlreadyTracked"));
                         } else {
-                            appCash.addAppToCash(app);
+                            appCache.addAppToCash(app);
                             appDAO.saveApp(app);
                             return menuService.getAppMainMenu(message, app);
                         }
