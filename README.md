@@ -4,3 +4,5 @@
 
 
 ![](https://github.com/kichutov/Apps-Check-Bot/blob/master/screen.jpg)
+
+<img src="https://github.com/kichutov/Apps-Check-Bot/blob/master/screen.jpg"/>
