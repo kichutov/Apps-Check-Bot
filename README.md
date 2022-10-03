@@ -8,6 +8,6 @@ In the telegram bot, you can configure which indicators you need to track:
 * Changing the number of installs
 * Rating change
 * Changing in the number of ratings
-* Moderation status
-
+* Moderation status  
+  
 <img src="https://github.com/kichutov/Apps-Check-Bot/blob/master/screen.jpg" width="30%"/>
